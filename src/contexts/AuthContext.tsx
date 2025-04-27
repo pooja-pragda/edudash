@@ -9,6 +9,7 @@ import type {
   UpdatePasswordCredentials,
   VerifyEmailCredentials,
 } from '../types/auth'
+import { rolePermissions } from '../pages/Users' // Import rolePermissions
 
 // Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -50,12 +51,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true)
       setError(null)
 
-      // Mock successful login
+      // Mock successful login with permissions
       const user: User = await mockApiCall({
         id: '1',
         email: credentials.email,
         name: 'John Doe',
         role: 'admin',
+        permissions: rolePermissions['admin'], // Assign permissions dynamically
         createdAt: new Date().toISOString(),
         isEmailVerified: true,
         lastLogin: new Date().toISOString(),
@@ -77,10 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true)
       setError(null)
 
-      // Mock successful registration
+      // Assign permissions dynamically during registration
       const user: User = await mockApiCall({
         id: '1',
         ...credentials,
+        permissions: rolePermissions[credentials.role],
         createdAt: new Date().toISOString(),
         isEmailVerified: false,
       })
@@ -195,4 +198,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
-} 
+}

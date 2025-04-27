@@ -143,7 +143,12 @@ export default function InstructorProfile() {
       <div className="bg-white rounded-lg border p-6">
         <div className="flex items-start gap-6">
           <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center text-4xl font-bold text-gray-400">
-            {instructor.name.charAt(0)}
+            <img
+              src={`/images/instructors/${instructor.id}.jpg`}
+              alt={instructor.name}
+              className="w-full h-full rounded-full object-cover"
+              loading="lazy"
+            />
           </div>
           <div className="flex-1">
             {isEditing ? (
@@ -348,4 +353,4 @@ export default function InstructorProfile() {
       </div>
     </div>
   )
-} 
+}

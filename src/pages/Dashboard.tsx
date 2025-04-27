@@ -49,10 +49,10 @@ const stats = [
 ]
 
 const recentCourses = [
-  { id: 1, name: 'Introduction to React', enrolled: 125, completion: 85, href: '/courses/1' },
-  { id: 2, name: 'Advanced JavaScript', enrolled: 98, completion: 72, href: '/courses/2' },
-  { id: 3, name: 'Python Fundamentals', enrolled: 156, completion: 65, href: '/courses/3' },
-  { id: 4, name: 'Data Science Basics', enrolled: 89, completion: 45, href: '/courses/4' },
+  { id: 1, name: 'Introduction to React', enrolled: 125, completion: 85, href: '/courses/1', image: '/images/react-course.jpg' },
+  { id: 2, name: 'Advanced JavaScript', enrolled: 98, completion: 72, href: '/courses/2', image: '/images/js-course.jpg' },
+  { id: 3, name: 'Python Fundamentals', enrolled: 156, completion: 65, href: '/courses/3', image: '/images/python-course.jpg' },
+  { id: 4, name: 'Data Science Basics', enrolled: 89, completion: 45, href: '/courses/4', image: '/images/data-science-course.jpg' },
 ]
 
 const recentActivity = [
@@ -62,6 +62,10 @@ const recentActivity = [
   { id: 4, user: 'Alice Brown', userId: '4', action: 'completed Chemistry 101', courseId: '8', time: '1 day ago' },
   { id: 5, user: 'Charlie Wilson', userId: '5', action: 'enrolled in Biology 101', courseId: '9', time: '1 day ago' },
 ]
+
+const sanitizeText = (text: string) => {
+  return text.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+}
 
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState('7')
@@ -83,172 +87,110 @@ export default function Dashboard() {
     <main className="p-6">
     <div className="space-y-6">
       {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Stats */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat) => (
+          <div key={stat.title} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-md bg-indigo-500 flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">42</span>
+                  <div className={`h-12 w-12 rounded-md ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="h-6 w-6 text-white" />
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Students</dt>
-                    <dd className="text-lg font-medium text-gray-900">1,234</dd>
+                    <dt className="text-sm font-medium text-gray-500 truncate">{stat.title}</dt>
+                    <dd className="text-lg font-semibold text-gray-900">{stat.value}</dd>
                   </dl>
                 </div>
               </div>
             </div>
           </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-md bg-green-500 flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">24</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Active Courses</dt>
-                    <dd className="text-lg font-medium text-gray-900">42</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-md bg-yellow-500 flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">12</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Instructors</dt>
-                    <dd className="text-lg font-medium text-gray-900">24</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-md bg-blue-500 flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">$</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Revenue</dt>
-                    <dd className="text-lg font-medium text-gray-900">$12,345</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Chart */}
-          <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
+        <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-medium text-gray-500">Revenue Overview</h2>
-              <div className="flex items-center gap-4">
-                <select
-                  value={timeRange}
-                  onChange={(e) => handleTimeRangeChange(e.target.value)}
-                  className="text-sm border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="7">Last 7 days</option>
-                  <option value="30">Last 30 days</option>
-                  <option value="90">Last 3 months</option>
+            <h2 className="text-base font-medium text-gray-500">Revenue Overview</h2>
+            <select
+              value={timeRange}
+              onChange={(e) => handleTimeRangeChange(e.target.value)}
+              className="text-sm border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 3 months</option>
             </select>
-                <button
-                  onClick={() => handleExportData('csv')}
-                  className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900"
-                >
-                  <Download className="h-4 w-4" />
-                  Export
-                </button>
-              </div>
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" stroke="#6b7280" />
-                  <YAxis stroke="#6b7280" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '0.375rem',
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                    dot={{ strokeWidth: 2 }}
-                    activeDot={{ r: 6 }}
-                  />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '0.375rem',
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                  dot={{ strokeWidth: 2 }}
+                  activeDot={{ r: 6 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Students Chart */}
-          <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
+        <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-medium text-gray-500">Student Enrollment</h2>
-              <div className="flex items-center gap-4">
-                <select
-                  value={timeRange}
-                  onChange={(e) => handleTimeRangeChange(e.target.value)}
-                  className="text-sm border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="7">Last 7 days</option>
-                  <option value="30">Last 30 days</option>
-                  <option value="90">Last 3 months</option>
-            </select>
-                <button
-                  onClick={() => handleExportData('csv')}
-                  className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900"
-                >
-                  <Download className="h-4 w-4" />
-                  Export
-                </button>
-              </div>
+            <h2 className="text-base font-medium text-gray-500">Student Enrollment</h2>
+            <div className="flex items-center gap-4">
+              <select
+                value={timeRange}
+                onChange={(e) => handleTimeRangeChange(e.target.value)}
+                className="text-sm border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 3 months</option>
+              </select>
+              <button
+                onClick={() => handleExportData('csv')}
+                className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900"
+              >
+                <Download className="h-4 w-4" />
+                Export
+              </button>
+            </div>
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" stroke="#6b7280" />
-                  <YAxis stroke="#6b7280" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '0.375rem',
-                    }}
-                  />
-                  <Bar
-                    dataKey="students"
-                    fill="#82ca9d"
-                    radius={[4, 4, 0, 0]}
-                  />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '0.375rem',
+                  }}
+                />
+                <Bar
+                  dataKey="students"
+                  fill="#82ca9d"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -257,26 +199,34 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Courses */}
-          <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
+        <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-medium text-gray-500">Popular Courses</h2>
-              <Link
-                to="/courses"
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
-              >
+            <h2 className="text-base font-medium text-gray-500">Popular Courses</h2>
+            <Link
+              to="/courses"
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
+            >
               View all
-              </Link>
+            </Link>
           </div>
           <div className="space-y-4">
             {recentCourses.map((course) => (
-                <Link
-                  key={course.id}
-                  to={course.href}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                >
-                <div>
-                  <h3 className="font-medium text-gray-900">{course.name}</h3>
-                  <p className="text-sm text-gray-500">{course.enrolled} students enrolled</p>
+              <Link
+                key={course.id}
+                to={course.href}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={course.image}
+                    alt={course.name}
+                    className="h-12 w-12 rounded-md object-cover"
+                    loading="lazy"
+                  />
+                  <div>
+                    <h3 className="font-medium text-gray-900">{course.name}</h3>
+                    <p className="text-sm text-gray-500">{course.enrolled} students enrolled</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
@@ -285,49 +235,49 @@ export default function Dashboard() {
                   </div>
                   <ChevronRight className="h-5 w-5 text-gray-400" />
                 </div>
-                </Link>
+              </Link>
             ))}
           </div>
         </div>
 
         {/* Recent Activity */}
-          <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
+        <div className="bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-medium text-gray-500">Recent Activity</h2>
-              <Link
-                to="/students"
-                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
-              >
+            <h2 className="text-base font-medium text-gray-500">Recent Activity</h2>
+            <Link
+              to="/students"
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
+            >
               View all
-              </Link>
+            </Link>
           </div>
           <div className="space-y-4">
-              {recentActivity.map((activity) => (
+            {recentActivity.map((activity) => (
               <div key={activity.id} className="flex items-center justify-between border-b pb-4 last:border-b-0">
                 <div>
-                    <Link
-                      to={`/students/${activity.userId}`}
-                      className="font-medium text-gray-900 hover:text-indigo-600 transition-colors duration-200"
-                    >
-                      {activity.user}
-                    </Link>
-                    <p className="text-sm text-gray-500">
-                      {activity.action.includes('enrolled') ? (
-                        <>
-                          enrolled in{' '}
-                          <Link
-                            to={`/courses/${activity.courseId}`}
-                            className="text-indigo-600 hover:text-indigo-700 hover:underline"
-                          >
-                            {activity.action.split('enrolled in ')[1]}
-                          </Link>
-                        </>
-                      ) : (
-                        activity.action
-                      )}
-                    </p>
+                  <Link
+                    to={`/students/${sanitizeText(activity.userId)}`}
+                    className="font-medium text-gray-900 hover:text-indigo-600 transition-colors duration-200"
+                  >
+                    {sanitizeText(activity.user)}
+                  </Link>
+                  <p className="text-sm text-gray-500">
+                    {activity.action.includes('enrolled') ? (
+                      <>
+                        enrolled in{' '}
+                        <Link
+                          to={`/courses/${sanitizeText(activity.courseId)}`}
+                          className="text-indigo-600 hover:text-indigo-700 hover:underline"
+                        >
+                          {sanitizeText(activity.action.split('enrolled in ')[1])}
+                        </Link>
+                      </>
+                    ) : (
+                      sanitizeText(activity.action)
+                    )}
+                  </p>
                 </div>
-                <span className="text-sm text-gray-500">{activity.time}</span>
+                <span className="text-sm text-gray-500">{sanitizeText(activity.time)}</span>
               </div>
             ))}
           </div>
@@ -336,4 +286,4 @@ export default function Dashboard() {
     </div>
     </main>
   )
-} 
+}

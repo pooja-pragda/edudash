@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import type { UserRole } from '../../types/auth'
+import { rolePermissions } from '../Users' // Import rolePermissions for dynamic assignment
 
 export default function Register() {
   const { register, error, isLoading, clearError } = useAuth()
@@ -31,6 +32,10 @@ export default function Register() {
     confirmPassword: '',
   })
 
+  const sanitizeInput = (input: string) => {
+    return input.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  }
+
   const validateForm = () => {
     let isValid = true
     const errors = {
@@ -44,6 +49,8 @@ export default function Register() {
     if (!formData.name.trim()) {
       errors.name = 'Name is required'
       isValid = false
+    } else {
+      formData.name = sanitizeInput(formData.name)
     }
 
     // Email validation
@@ -54,6 +61,8 @@ export default function Register() {
     } else if (!emailRegex.test(formData.email)) {
       errors.email = 'Invalid email format'
       isValid = false
+    } else {
+      formData.email = sanitizeInput(formData.email)
     }
 
     // Password validation
@@ -85,6 +94,7 @@ export default function Register() {
     if (validateForm()) {
       try {
         const { confirmPassword, ...registerData } = formData
+        registerData.permissions = rolePermissions[registerData.role] // Assign permissions dynamically
         await register(registerData)
       } catch (error) {
         // Error is handled by the auth context
@@ -139,7 +149,7 @@ export default function Register() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition-shadow duration-200 shadow-sm focus:shadow-md"
                 placeholder="Enter your full name"
               />
               {formErrors.name && (
@@ -230,6 +240,8 @@ export default function Register() {
                 <SelectContent>
                   <SelectItem value="student">Student</SelectItem>
                   <SelectItem value="instructor">Instructor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="guest">Guest</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -239,7 +251,7 @@ export default function Register() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform hover:scale-105"
             >
               {isLoading ? (
                 <svg
@@ -272,4 +284,4 @@ export default function Register() {
       </div>
     </div>
   )
-} 
+}

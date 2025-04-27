@@ -10,17 +10,8 @@ import {
   ColumnFiltersState,
   flexRender,
 } from '@tanstack/react-table'
-import { useNavigate, Outlet } from 'react-router-dom'
-import {
-  MoreHorizontal,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  Plus,
-  Star,
-} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronDown, ChevronUp, Star, MoreHorizontal } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@radix-ui/react-dropdown-menu'
 
+// Define the Instructor type
 type Instructor = {
   id: string
   name: string
@@ -39,6 +31,7 @@ type Instructor = {
   joinDate: string
 }
 
+// Sample data for instructors
 const sampleInstructors: Instructor[] = [
   {
     id: '1',
@@ -81,6 +74,7 @@ export default function Instructors() {
     return savedInstructors ? JSON.parse(savedInstructors) : sampleInstructors
   })
 
+  // Define table columns
   const columns = useMemo<ColumnDef<Instructor>[]>(
     () => [
       {
@@ -143,21 +137,19 @@ export default function Instructors() {
       },
       {
         accessorKey: 'rating',
-        header: ({ column }) => {
-          return (
-            <button
-              className="flex items-center gap-1"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Rating
-              {column.getIsSorted() === 'asc' ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : column.getIsSorted() === 'desc' ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : null}
-            </button>
-          )
-        },
+        header: ({ column }) => (
+          <button
+            className="flex items-center gap-1"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Rating
+            {column.getIsSorted() === 'asc' ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : column.getIsSorted() === 'desc' ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : null}
+          </button>
+        ),
         cell: ({ row }) => {
           const rating = parseFloat(row.getValue('rating'))
           return (
@@ -202,7 +194,6 @@ export default function Instructors() {
         id: 'actions',
         cell: ({ row }) => {
           const instructor = row.original
-
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -244,9 +235,10 @@ export default function Instructors() {
         },
       },
     ],
-    []
+    [instructors, navigate]
   )
 
+  // Initialize the table
   const table = useReactTable({
     data: instructors,
     columns,
@@ -264,6 +256,7 @@ export default function Instructors() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Instructors</h1>
         <button
@@ -274,13 +267,14 @@ export default function Instructors() {
         </button>
       </div>
 
+      {/* Table */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:px-6">
           <h3 className="text-lg font-medium leading-6 text-gray-900">Instructor List</h3>
         </div>
         <div className="border-t border-gray-200">
           <ul className="divide-y divide-gray-200">
-              {table.getRowModel().rows.map((row) => (
+            {table.getRowModel().rows.map((row) => (
               <li key={row.id} className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-medium text-indigo-600 truncate">
@@ -297,11 +291,11 @@ export default function Instructors() {
                     <div className="flex items-center text-sm text-gray-500">
                       <span>{row.getValue('email')}</span>
                     </div>
-        </div>
+                  </div>
                   <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                     <span>Teaching {row.getValue('courses')} courses</span>
-          </div>
-          </div>
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
@@ -309,4 +303,4 @@ export default function Instructors() {
       </div>
     </div>
   )
-} 
+}

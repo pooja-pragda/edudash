@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@radix-ui/react-dropdown-menu'
 import Layout from '../components/layout/Layout'
+import type { User } from '../types/auth' // Use shared User type
 
 type Role = 'admin' | 'instructor' | 'student'
 
@@ -39,16 +40,6 @@ type Permission = {
   id: string
   name: string
   description: string
-}
-
-type User = {
-  id: string
-  name: string
-  email: string
-  role: Role
-  status: 'active' | 'inactive'
-  lastLogin: string
-  permissions: string[]
 }
 
 const permissions: Permission[] = [
@@ -61,7 +52,7 @@ const permissions: Permission[] = [
 
 const rolePermissions: Record<Role, string[]> = {
   admin: ['manage_users', 'manage_courses', 'manage_students', 'view_analytics', 'manage_payments'],
-  instructor: ['manage_courses', 'manage_students', 'view_analytics'],
+  instructor: ['manage_courses', 'view_analytics'],
   student: [],
 }
 
@@ -73,7 +64,7 @@ const initialUsers: User[] = [
     role: 'admin',
     status: 'active',
     lastLogin: '2024-04-20',
-    permissions: rolePermissions.admin,
+    permissions: rolePermissions['admin'], // Dynamically assign permissions
   },
   {
     id: '2',
@@ -82,7 +73,7 @@ const initialUsers: User[] = [
     role: 'instructor',
     status: 'active',
     lastLogin: '2024-04-19',
-    permissions: rolePermissions.instructor,
+    permissions: rolePermissions['instructor'],
   },
   {
     id: '3',
@@ -91,9 +82,14 @@ const initialUsers: User[] = [
     role: 'student',
     status: 'active',
     lastLogin: '2024-04-18',
-    permissions: rolePermissions.student,
+    permissions: rolePermissions['student'],
   },
 ]
+
+const validateEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
 
 export default function Users() {
   const [data, setData] = useState<User[]>(() => {
@@ -120,26 +116,41 @@ export default function Users() {
   }, [data])
 
   const handleAddUser = () => {
-    if (newUser.name && newUser.email && newUser.role) {
-      const user: User = {
-        id: (data.length + 1).toString(),
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role as Role,
-        status: newUser.status as 'active' | 'inactive',
-        lastLogin: new Date().toISOString().split('T')[0],
-        permissions: rolePermissions[newUser.role as Role],
-      }
-      setData([...data, user])
-      setIsAddUserModalOpen(false)
-      setNewUser({
-        name: '',
-        email: '',
-        role: 'student',
-        status: 'active',
-        permissions: [],
-      })
+    if (!newUser.name || !newUser.email || !newUser.role) {
+      alert('All fields are required.')
+      return
     }
+
+    if (!validateEmail(newUser.email)) {
+      alert('Invalid email format.')
+      return
+    }
+
+    const sanitizedUser = {
+      ...newUser,
+      name: newUser.name.replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+      email: newUser.email.replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+    }
+
+    const user: User = {
+      id: (data.length + 1).toString(),
+      name: sanitizedUser.name,
+      email: sanitizedUser.email,
+      role: sanitizedUser.role as Role,
+      status: sanitizedUser.status as 'active' | 'inactive',
+      lastLogin: new Date().toISOString().split('T')[0],
+      permissions: rolePermissions[sanitizedUser.role as Role],
+    }
+
+    setData([...data, user])
+    setIsAddUserModalOpen(false)
+    setNewUser({
+      name: '',
+      email: '',
+      role: 'student',
+      status: 'active',
+      permissions: [],
+    })
   }
 
   const handleDeleteUser = (id: string) => {
@@ -300,7 +311,7 @@ export default function Users() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {stats.map((stat) => (
-            <div key={stat.name} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div key={stat.name} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.name}</p>
@@ -314,45 +325,44 @@ export default function Users() {
           ))}
         </div>
 
-        <div className="space-y-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between">
+        <div className="space-y-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <button 
-              className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+              className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform duration-200 transform hover:scale-105"
               onClick={() => setIsAddUserModalOpen(true)}
             >
               <UserPlus className="h-4 w-4" />
               Add User
             </button>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-10 w-full rounded-lg border border-gray-200 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none transition-colors duration-200"
-              />
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-10 w-full rounded-lg border border-gray-200 pl-10 pr-4 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none transition-colors duration-200"
+                />
+              </div>
+              <select
+                value={roleFilter}
+                onChange={(e) => {
+                  setRoleFilter(e.target.value)
+                  if (e.target.value === 'all') {
+                    setColumnFilters([])
+                  } else {
+                    setColumnFilters([{ id: 'role', value: e.target.value }])
+                  }
+                }}
+                className="h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none transition-colors duration-200"
+              >
+                <option value="all">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="instructor">Instructor</option>
+                <option value="student">Student</option>
+              </select>
             </div>
-            <select
-              value={roleFilter}
-              onChange={(e) => {
-                setRoleFilter(e.target.value)
-                if (e.target.value === 'all') {
-                  setColumnFilters([])
-                } else {
-                  setColumnFilters([{ id: 'role', value: e.target.value }])
-                }
-              }}
-              className="h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none transition-colors duration-200"
-            >
-              <option value="all">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="instructor">Instructor</option>
-              <option value="student">Student</option>
-            </select>
           </div>
 
           <div className="rounded-lg border bg-white">
@@ -596,4 +606,4 @@ export default function Users() {
       </main>
     </Layout>
   )
-} 
+}

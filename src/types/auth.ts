@@ -14,6 +14,7 @@ export interface User {
     newsletter: boolean
     marketing: boolean
   }
+  permissions: string[]; // New property for role-based access
 }
 
 export interface AuthState {
@@ -59,4 +60,4 @@ export type AuthContextType = {
   updatePassword: (credentials: UpdatePasswordCredentials) => Promise<void>
   verifyEmail: (credentials: VerifyEmailCredentials) => Promise<void>
   clearError: () => void
-} 
+}
